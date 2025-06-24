@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('partials/head') %>
+    <title>PostBin API</title>
+</head>
+
+<body class="leading-normal">
+  <%- include('partials/header') %>
+
+    <div class="container mx-auto page-content-body" id="app">
+      <div class="flex">
+        <div class="h-auto p-6 w-3/4">
+          <h1>PostBin API</h1>
+          <p>
+            This API lets you create bins, inspect HTTP requests, and integrate PostBin into your tests, CI, or webhook
+            flows. You can manage bins, retrieve data, or inspect headers, bodies, and queries—all programmatically.
+          </p>
+
+          <h2>Create a Bin</h2>
+          <p><code>POST /api/bin</code></p>
+          <p>Creates a new bin that expires after 30 minutes.</p>
+          <pre>
+$ curl -X POST https://<%= host %>/api/bin
+
+Response:
+{
+  "binId": "abc123xy",
+  "now": 1719240000000,
+  "expires": 1719241800000
+}
+        </pre>
+
+          <h2>Inspect a Bin</h2>
+          <p><code>GET /api/bin/:binId</code></p>
+          <p>Returns metadata about a bin.</p>
+          <pre>
+$ curl https://<%= host %>/api/bin/abc123xy
+
+Response:
+{
+  "binId": "abc123xy",
+  "now": 1719240000000,
+  "expires": 1719241800000
+}
+        </pre>
+          <!--
+          <h2>Delete a Bin</h2>
+          <p><code>DELETE /api/bin/:binId</code></p>
+          <p>Deletes a bin and all associated requests.</p>
+          <pre>
+$ curl -X DELETE https://<%= host %>/api/bin/abc123xy
+
+Response:
+{ "msg": "Bin deleted" }
+        </pre>
+      -->
+
+          <h2>Get Requests</h2>
+          <p><code>GET /api/bin/:binId/requests</code></p>
+          <p>Returns an array of requests received by the bin. You can add <code>?since=timestamp</code> to poll for new
+            ones.</p>
+          <pre>
+$ curl https://<%= host %>/api/bin/abc123xy/requests?since=1719240000000
+        </pre>
+
+          <h2>Get One Request</h2>
+          <p><code>GET /api/bin/:binId/req/:reqId</code></p>
+          <pre>
+$ curl https://<%= host %>/api/bin/abc123xy/req/req_001
+        </pre>
+          <!--
+          <h2>Shift (Pop First) Request</h2>
+          <p><code>GET /api/bin/:binId/req/shift</code></p>
+          <p>Returns and removes the first request (FIFO behavior).</p>
+          <pre>
+$ curl https://<%= host %>/api/bin/abc123xy/req/shift
+        </pre>
+        -->
+        </div>
+
+        <div class="h-auto p-6 w-1/4">
+          <h2>About</h2>
+          <p>PostBin lets you inspect HTTP requests sent by your app, webhook, or client. It captures headers, body,
+            query
+            params, method, and more.</p>
+
+          <h2>Notes</h2>
+          <p>Bins expire automatically after 30 minutes. Stay tuned for persistent bin support in future releases.</p>
+
+          <h2>Need Help?</h2>
+          <p>Check the <a href="/api" class="text-blue">API Docs</a> or inspect requests visually by creating a new bin
+            on
+            the <a href="/" class="text-blue">home page</a>.</p>
+        </div>
+      </div>
+    </div>
+
+    <%- include('partials/footer') %>
+</body>
+
+</html>

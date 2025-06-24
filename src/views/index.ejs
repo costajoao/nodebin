@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('partials/head') %>
+    <title>PostBin: Test Your API Clients or Webhooks</title>
+</head>
+
+<body class="leading-normal">
+  <%- include('partials/header') %>
+
+    <div class="container mx-auto page-content-body" id="app">
+      <div class="flex">
+        <div class="h-auto p-6 w-3/4">
+          <h1>PostBin</h1>
+          <h2>Programmatically Test your API Clients or Webhooks</h2>
+          <p>
+            Use PostBin to collect all requests to a special URL which you can use to test your API Clients or your
+            WebHooks.
+            Inspect your bin visually on this website, or use our API to programmatically test your libraries, clients,
+            projects, SaaS or websites.
+          </p>
+          <h2>Four Tiny Steps</h2>
+          <ol>
+            <li>Create a new Bin</li>
+            <li>Send any request (GET, POST, PUT, PATCH, DELETE, etc) to your bin</li>
+            <li>Read your bin contents</li>
+            <li>Compare with the result(s) you expect</li>
+          </ol>
+          <h2>What are you waiting for?</h2>
+          <div class="text-center p-6">
+            <form class="form-inline" method="POST" action="/">
+              <button class="btn" id="create-bin-button" type="submit">Create Bin</button>
+            </form>
+          </div>
+          <p>Once you create a bin, you can send requests to it and view the results.</p>
+        </div>
+        <div class="h-auto p-6 w-1/4">
+          <h2>API</h2>
+          <p>PostBin has an <a href="/api">API</a> that you can use programmatically - yes, this is the killer feature.
+            See our <a href="/api">API Docs</a> for more details.</p>
+          <h2>Notes</h2>
+          <p>Each bin will expire after 30 mins. If you need bins that last longer then stay tuned for updates.</p>
+        </div>
+      </div>
+    </div>
+    <%- include('partials/footer') %>
+</body>
+
+</html>

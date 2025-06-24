@@ -1,0 +1,82 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #2d3748;
+  transition: all 0.3s ease-in-out;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  margin: 1em 0;
+}
+
+.bg-header {
+  background-color: #5d2a7c;
+}
+.bg-header a {
+  color: #fff !important;
+}
+.bg-header a:hover {
+  color: #e4b8ff !important;
+}
+
+a {
+  text-decoration: none;
+  color: #5d2a7c;
+  transition: all 0.3s ease-in-out;
+}
+
+a:hover {
+  color: #3b1b4f;
+}
+
+p {
+  margin-bottom: 1em;
+}
+
+pre {
+  background: #f7fafc;
+  padding: 1em;
+  border-radius: 0.25rem;
+  overflow-x: auto;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.btn {
+  background: #5d2a7c;
+  color: #fff;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  border-radius: 0.4rem;
+  text-decoration: none;
+  font-weight: normal;
+  transition: all 0.3s ease-in-out;
+}
+
+.btn:hover {
+  background: #7841a3;
+}
+
+#empty-message {
+  text-align: center;
+  margin: 4em 0 2em;
+  font-size: 2em;
+  color: #718096;
+}
+
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
