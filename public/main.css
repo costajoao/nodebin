@@ -1,41 +1,32 @@
+/* Root defaults */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   color: #2d3748;
+  background-color: #fff;
   transition: all 0.3s ease-in-out;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+h1, h2, h3, h4, h5, h6 {
+  font-family: inherit;
   margin: 1em 0;
 }
 
-.bg-header {
-  background-color: #5d2a7c;
+h1 {
+  margin-top: 0.5em;
 }
-.bg-header a {
-  color: #fff !important;
-}
-.bg-header a:hover {
-  color: #e4b8ff !important;
+
+h3, h4 {
+  font-weight: normal;
 }
 
 a {
-  text-decoration: none;
   color: #5d2a7c;
+  text-decoration: none;
   transition: all 0.3s ease-in-out;
 }
 
 a:hover {
   color: #3b1b4f;
-}
-
-p {
-  margin-bottom: 1em;
 }
 
 pre {
@@ -46,37 +37,210 @@ pre {
   font-family: 'Courier New', Courier, monospace;
 }
 
+p {
+  margin-bottom: 1em;
+}
+
 .btn {
   background: #5d2a7c;
   color: #fff;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.4rem;
-  text-decoration: none;
   font-weight: normal;
   transition: all 0.3s ease-in-out;
+  border: none;
+  cursor: pointer;
 }
 
 .btn:hover {
   background: #7841a3;
 }
 
-#empty-message {
+/* Header */
+.bg-header {
+  background-color: #5d2a7c;
+}
+
+.bg-header a {
+  color: #fff !important;
+}
+
+.bg-header a:hover {
+  color: #e4b8ff !important;
+}
+
+/* Empty state */
+#waiting {
   text-align: center;
-  margin: 4em 0 2em;
-  font-size: 2em;
+  margin: 2em 0 0;
+  font-size: 1.5em;
+  color: #718096;
+  display: flex;
+}
+
+#waiting.hidden {
+  display: none;
+}
+
+/* Toast */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2d3748;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 14px;
+  opacity: 0;
+  z-index: 1000;
+  transition: opacity 0.3s ease-in-out;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  animation: toast-slide-up 0.4s ease-out;
+}
+
+@keyframes toast-slide-up {
+  0% {
+    transform: translate(-50%, 20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+/* Highlight animation */
+@keyframes highlight {
+  0% {
+    background-color: #fff9c4;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.animate-highlight {
+  animation: highlight 2s ease-in-out;
+}
+
+/* Flash animation (unused but available) */
+@keyframes flash {
+  0% {
+    background-color: #fefcbf;
+  }
+  100% {
+    background-color: inherit;
+  }
+}
+
+.animate-flash {
+  animation: flash 1.5s ease-out;
+}
+
+/* Ripple Loader */
+.lds-ripple {
+  display: inline-block;
+  position: relative;
+  width: 30px;
+  height: 30px;
   color: #718096;
 }
 
-.fade-in {
-  opacity: 0;
-  animation: fadeIn 0.5s ease-in forwards;
+.lds-ripple div {
+  position: absolute;
+  border: 2px solid currentColor;
+  opacity: 1;
+  border-radius: 50%;
+  animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
 }
 
-@keyframes fadeIn {
-  to {
+.lds-ripple div:nth-child(2) {
+  animation-delay: -0.5s;
+}
+
+@keyframes lds-ripple {
+  0% {
+    top: 13px;
+    left: 13px;
+    width: 4px;
+    height: 4px;
+    opacity: 0;
+  }
+  5% {
     opacity: 1;
   }
+  100% {
+    top: 0;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    opacity: 0;
+  }
+}
+
+/* Dark Mode */
+body.dark {
+  background-color: #1a202c;
+  color: #edf2f7;
+}
+
+body.dark a {
+  color: #90cdf4;
+}
+
+body.dark a:hover {
+  color: #63b3ed;
+}
+
+body.dark pre {
+  background: #2d3748;
+  color: #e2e8f0;
+}
+
+body.dark .btn {
+  background: #4a5568;
+  color: #fff;
+}
+
+body.dark .btn:hover {
+  background: #2d3748;
+}
+
+body.dark .bg-header {
+  background-color: #2d3748;
+}
+
+body.dark .bg-header a {
+  color: #edf2f7 !important;
+}
+
+
+/* Dark mode flash animation */
+@keyframes flash-dark {
+  0% {
+    background-color: #4a5568;
+  }
+  100% {
+    background-color: inherit;
+  }
+}
+
+body.dark .animate-flash {
+  animation: flash-dark 1.5s ease-out !important;
+}
+
+body.dark .bg-header a:hover {
+  color: #90cdf4 !important;
+}
+
+body.dark .bg-grey-light {
+  background-color: #2d3748;
+}
+
+body.dark #toast {
+  background: #2d3748;
+  color: #fff;
+  box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
 }

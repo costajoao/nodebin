@@ -1,0 +1,35 @@
+// db.ts
+import sqlite3 from 'sqlite3'
+
+const db = new sqlite3.Database('./postbin.db')
+
+// Ensure schema and clean data on boot
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS bins (
+      id TEXT PRIMARY KEY,
+      created_at INTEGER DEFAULT (strftime('%s','now') * 1000),
+      expires_at INTEGER DEFAULT ((strftime('%s','now') + 1800) * 1000) -- 30 min
+    )
+  `)
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      bin_id TEXT,
+      method TEXT,
+      path TEXT,
+      headers TEXT,
+      query TEXT,
+      body TEXT,
+      ip TEXT,
+      created_at INTEGER DEFAULT (strftime('%s','now') * 1000)
+    )
+  `)
+
+  // Clean all (dev only)
+  db.run('DELETE FROM requests')
+  db.run('DELETE FROM bins')
+})
+
+export default db
