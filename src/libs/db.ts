@@ -3,6 +3,8 @@ import sqlite3 from 'sqlite3'
 
 const db = new sqlite3.Database('./postbin.db')
 
+const IS_PROD = process.env.NODE_ENV === 'production'
+
 // Ensure schema and clean data on boot
 db.serialize(() => {
   db.run(`
@@ -27,9 +29,11 @@ db.serialize(() => {
     )
   `)
 
-  // Clean all (dev only)
-  db.run('DELETE FROM requests')
-  db.run('DELETE FROM bins')
+  // Clean all (prod only)
+  if (IS_PROD) {
+    db.run('DELETE FROM requests')
+    db.run('DELETE FROM bins')
+  }
 })
 
 export default db

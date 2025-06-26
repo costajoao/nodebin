@@ -11,7 +11,7 @@ NodeBin is a lightweight, self-hosted HTTP request collector — ideal for testi
 - 📈 Live tail mode with auto-scroll
 - 📦 RESTful API to create bins and fetch requests
 - 🗑️ Bins expire automatically after 30 minutes
-- 🧼 Minimal and portable — runs on SQLite and Express.js
+- 🧼 Minimal and portable — runs on SQLite and Bun.js
 - 🎨 Clean, responsive UI built with Tailwind CSS
 
 ## 🖥️ Demo
@@ -30,13 +30,13 @@ cd postbin
 ### 2. Install dependencies
 
 ```bash
-npm install
+bun install
 ```
 
 ### 3. Run the server
 
 ```bash
-npm start
+bun start
 ```
 
 By default, NodeBin runs on [http://localhost:3001](http://localhost:3001)
@@ -65,7 +65,7 @@ See full [API documentation](http://localhost:3001/api) in the UI.
 
 ## 🧰 Tech Stack
 
-- **Backend:** Node.js, Express.js, SQLite
+- **Backend:** Bun.js, SQLite
 - **Frontend:** Vanilla JS, Tailwind CSS
 - **Database:** SQLite (in-memory by default)
 
@@ -74,7 +74,7 @@ See full [API documentation](http://localhost:3001/api) in the UI.
 ```
 .
 ├── db.js              # SQLite schema and setup
-├── index.js           # Main Express app
+├── index.js           # Main Bun app
 ├── views/             # EJS templates
 ├── public/            # Static files (CSS, favicon)
 ├── routes/            # API + frontend routes
