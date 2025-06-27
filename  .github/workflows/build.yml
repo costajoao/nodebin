@@ -9,11 +9,6 @@ concurrency:
   group: release-${{ github.workflow }}
   cancel-in-progress: false
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
 jobs:
   release-and-deploy:
     if: github.actor != 'github-actions[bot]'
@@ -68,6 +63,11 @@ jobs:
           git add RELEASE.md
           git commit -m "docs: append release notes for v${{ env.NEW_VERSION }}" || echo "No changes"
           git push origin main
+          
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -79,7 +79,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build & push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
