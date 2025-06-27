@@ -4,3 +4,4 @@ main = "src/index.ts"
 
 [compiler]
 resolveJsonModule = true
+#
