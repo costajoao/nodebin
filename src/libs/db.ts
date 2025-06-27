@@ -1,7 +1,8 @@
 // db.ts
+import { join } from 'node:path'
 import { Database } from 'bun:sqlite'
 
-const db = new Database('../data/postbin.db')
+const db = new Database(join(__dirname, '../../data/postbin.db'))
 
 const IS_PROD = process.env.NODE_ENV === 'production'
 
