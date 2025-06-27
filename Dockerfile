@@ -1,14 +1,18 @@
+# Use the official Bun image
 FROM oven/bun:1.2.17
 
-# Set non-interactive mode for apt
+# Set non-interactive mode for apt-get
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install git and tzdata (without prompts)
+# Install required packages: git, CA certificates, and timezone data
 RUN apt-get update && \
-  apt-get install -y --no-install-recommends git tzdata && \
+  apt-get install -y --no-install-recommends \
+  git \
+  ca-certificates \
+  tzdata && \
   rm -rf /var/lib/apt/lists/*
 
-# Clone the repo
+# Clone your repository into /app
 RUN git clone https://github.com/costajoao/nodebin.git /app
 
 # Set working directory
@@ -17,13 +21,11 @@ WORKDIR /app
 # Install dependencies using Bun
 RUN bun install
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV TZ=America/Sao_Paulo
+# Set the PORT environment variable (default to 3000)
+ENV PORT=${PORT:-3000}
 
-# Expose port
+# Expose the application port
 EXPOSE ${PORT}
 
-# Start app
+# Start the application
 CMD ["bun", "src/index.ts"]

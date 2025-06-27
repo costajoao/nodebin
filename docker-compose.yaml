@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  nodebin:
+    image: costajoao/nodebin:latest
+    container_name: nodebin
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      TZ: America/Los_Angeles
+      PORT: 3000
+    volumes:
+      - ./data:/app/data
