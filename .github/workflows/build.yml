@@ -55,8 +55,7 @@ jobs:
       packages: write
 
     outputs:
-      new_version: ${{ steps.bump.outputs.new_version }}
-      release_notes: ${{ steps.changelog.outputs.release_notes }}
+      version: ${{ steps.version.outputs.version }}
 
     steps:
       - name: Checkout code
@@ -67,37 +66,37 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Bump package version (minor)
-        id: bump
-        run: |
-          npm version minor --no-git-tag-version
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+      # - name: Bump package version (minor)
+      #   id: bump
+      #   run: |
+      #     npm version patch --no-git-tag-version
+      #     NEW_VERSION=$(node -p "require('./package.json').version")
+      #     echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+      #     echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
-      - name: Commit and tag new version
-        run: |
-          git commit -am "chore: bump version to $NEW_VERSION"
-          git tag v$NEW_VERSION
-          git push origin main --follow-tags
+      # - name: Commit and tag new version
+      #   run: |
+      #     git commit -am "chore: bump version to $NEW_VERSION"
+      #     git tag v$NEW_VERSION
+      #     git push origin main --follow-tags
 
-      - name: Get next version
+      - name: Bump package version
         uses: reecetech/version-increment@2024.10.1
         id: version
         with:
           scheme: semver
           increment: patch
 
+      - name: Commit and tag new version
+        run: |
+          git commit -am "chore: bump version to ${{ steps.version.outputs.version }}"
+          git tag v${{ steps.version.outputs.version }}
+          git push origin main --follow-tags
+
       - name: Generate release changelog
         uses: janheinrichmerker/action-github-changelog-generator@v2.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }} 
-
-      # - name: Commit updated RELEASE.md
-      #   run: |
-      #     git add RELEASE.md
-      #     git commit -m "docs: append release notes for v${{ env.NEW_VERSION }}" || echo "No changes"
-      #     git push origin main
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -123,18 +122,18 @@ jobs:
           sbom: true
           tags: |
             costajoao/nodebin:latest
-            costajoao/nodebin:${{ needs.build.outputs.new_version }}
+            costajoao/nodebin:${{ steps.version.outputs.version }}
 
       - name: Generate release changelog
         uses: janheinrichmerker/action-github-changelog-generator@v2.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Commit updated RELEASE.md
-        run: |
-          git add RELEASE.md
-          git commit -m "docs: append release notes for v${{ needs.build.outputs.new_version }}" || echo "No changes"
-          git push origin main
+      # - name: Commit updated RELEASE.md
+      #   run: |
+      #     git add RELEASE.md
+      #     git commit -m "docs: append release notes for v${{ steps.version.outputs.version }}" || echo "No changes"
+      #     git push origin main
 
   release:
     name: Create GitHub Release
@@ -146,16 +145,14 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ needs.build.outpåuts.new_version }}
-          name: v${{ needs.build.outputs.new_version }}
+          tag_name: v${{ needs.build.outputs.version }}
+          name: v${{ needs.build.outputs.version }}
           body_path: RELEASE.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  pr_build:
-    if: github.event_name == 'pull_request'
-    name: PR Build (No Version/Tag)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      # Add build/test steps here as needed
+          
+      - name: Upload Docker Image Digest
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-image-digest
+          path: ./docker-image-digest.txt
