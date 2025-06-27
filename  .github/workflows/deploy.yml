@@ -14,7 +14,7 @@ on:
 
 jobs:
   build-and-release:
-    runs-on: [self-hosted, nodebin]
+    runs-on: self-hosted
     environment: production
     permissions:
       contents: write
