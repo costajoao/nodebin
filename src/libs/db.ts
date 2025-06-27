@@ -1,14 +1,13 @@
 // db.ts
 import { join } from 'node:path'
-import { Database } from 'sqlite3'
+import { Database } from 'bun:sqlite'
 
 const db = new Database(join(__dirname, '../../data/postbin.db'))
 
 const IS_PROD = process.env.NODE_ENV === 'production'
 
 // Ensure schema and clean data on boot
-db.serialize(() => {
-  db.run(`
+db.run(`
     CREATE TABLE IF NOT EXISTS bins (
       id TEXT PRIMARY KEY,
       created_at INTEGER DEFAULT (strftime('%s','now') * 1000),
@@ -16,7 +15,7 @@ db.serialize(() => {
     )
   `)
 
-  db.run(`
+db.run(`
     CREATE TABLE IF NOT EXISTS requests (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       bin_id TEXT,
@@ -30,11 +29,10 @@ db.serialize(() => {
     )
   `)
 
-  // Clean all (prod only)
-  if (IS_PROD) {
-    db.run('DELETE FROM requests')
-    db.run('DELETE FROM bins')
-  }
-})
+// Clean all (prod only)
+if (IS_PROD) {
+  db.run('DELETE FROM requests')
+  db.run('DELETE FROM bins')
+}
 
 export default db

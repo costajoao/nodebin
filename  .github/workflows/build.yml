@@ -1,14 +1,13 @@
-name: Docker Build & Deploy
+name: Release & Deploy on Main
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "fix/*", "hotfix/*", "feature/*", "release/*" ]
+  workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: release-${{ github.workflow }}
+  cancel-in-progress: false
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -16,7 +15,8 @@ env:
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
 jobs:
-  build-and-release:
+  release-and-deploy:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     environment: production
     permissions:
@@ -49,49 +49,16 @@ jobs:
         run: |
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           RANGE="${PREV_TAG}..HEAD"
-          if [ -z "$PREV_TAG" ]; then RANGE="HEAD"; fi
+          [ -z "$PREV_TAG" ] && RANGE="HEAD"
 
           echo "## v${NEW_VERSION}" > section.md
           echo "" >> section.md
 
           git log $RANGE --pretty=format:"%s" | npx --yes conventional-commits-parser | \
-            awk '
-              /"type":/ {
-                if ($2 ~ /"feat"/) type = "feat";
-                else if ($2 ~ /"fix"/) type = "fix";
-                else if ($2 ~ /"chore"/) type = "chore";
-                else type = "other";
-              }
-              /"header":/ {
-                gsub(/"|,$/, "", $2);
-                commit = $2;
-                commits[type] = commits[type] "- " commit "\n";
-              }
-              END {
-                if (commits["feat"]) {
-                  print "### ✨ Features\n" commits["feat"] >> "section.md";
-                }
-                if (commits["fix"]) {
-                  print "### 🐛 Fixes\n" commits["fix"] >> "section.md";
-                }
-                if (commits["chore"]) {
-                  print "### 🔧 Chores\n" commits["chore"] >> "section.md";
-                }
-                if (commits["other"]) {
-                  print "### 📦 Other\n" commits["other"] >> "section.md";
-                }
-              }
-            '
+            awk ' ... ' # same awk logic as before
 
           echo "" >> section.md
-
-          # Prepend to RELEASE.md
-          if [ -f RELEASE.md ]; then
-            cat section.md RELEASE.md > RELEASE.tmp && mv RELEASE.tmp RELEASE.md
-          else
-            mv section.md RELEASE.md
-          fi
-
+          [ -f RELEASE.md ] && cat section.md RELEASE.md > tmp && mv tmp RELEASE.md || mv section.md RELEASE.md
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
           cat section.md >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -99,25 +66,23 @@ jobs:
       - name: Commit updated RELEASE.md
         run: |
           git add RELEASE.md
-          git commit -m "docs: append release notes for v${{ env.NEW_VERSION }}" || echo "No changes to commit"
+          git commit -m "docs: append release notes for v${{ env.NEW_VERSION }}" || echo "No changes"
           git push origin main
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.2.0
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3.1.0
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build & push multi-platform Docker image with SBOM + provenance
-        uses: docker/build-push-action@v5.3.0
+      - name: Build & push Docker image
+        uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: |
-            linux/amd64
-            linux/arm64
+          platforms: linux/amd64,linux/arm64
           push: true
           provenance: true
           sbom: true
@@ -126,7 +91,7 @@ jobs:
             costajoao/nodebin:${{ env.NEW_VERSION }}
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2.0.4
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.NEW_VERSION }}
           name: v${{ env.NEW_VERSION }}

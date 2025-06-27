@@ -1,30 +1,34 @@
-import express from 'express'
+import express, {type Request, type Response } from 'express'
 import frontend from './frontend'
 import api from './api'
 import db from '../libs/db'
+import Logger from '../libs/logger'
 
 const router = express.Router()
+const logger = Logger('HealthCheck')
 
-// Import frontend routers
+// Import frontend and API routers
 router.use(frontend)
-
-// Import API routers
 router.use(api)
 
 // Health check endpoint
-router.get('/health', (_req, res) => {
-  // Check if the database is accessible
+router.get('/api/health', async (_req: Request, res: Response) => {
   try {
-    db.get('SELECT 1', [], (err) => {
-      if (err) {
-        console.error('Database connection error:', err)
-        return res.status(500).json({ status: 'error', message: 'Database is unreachable' })
-      }
-    })
+    db.query('SELECT 1').get()
     res.status(200).json({ status: 'ok', message: 'Service is healthy' })
-  } catch (error) {
-    console.error('Health check failed:', error)
-    res.status(500).json({ status: 'error', message: 'Service is unhealthy' })
+  } catch (err) {
+    logger.error('Database connection error:', err)
+    res.status(500).json({ status: 'error', message: 'Database is unreachable' })
   }
 })
+
+router.get('/.well-known/appspecific/com.chrome.devtools.json', (_req, res) => {
+  // Return sample devtools JSON (customize as needed)
+  return res.status(200).json({
+    devtools: process.env.NODE_ENV !== "production",
+    environment: process.env.NODE_ENV || "development",
+    timestamp: new Date().toISOString(),
+  });
+})
+
 export default router
