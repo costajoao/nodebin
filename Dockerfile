@@ -3,9 +3,10 @@ FROM oven/bun:1.2.7-slim AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt update && apt upgrade -y
-RUN apt install -y --no-install-recommends git ca-certificates tzdata
-RUN rm -rf /var/lib/apt/lists/*
+RUN apt update && apt upgrade -y && \
+  apt install -y --no-install-recommends \
+  git ca-certificates tzdata && \
+  rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 RUN git clone https://github.com/costajoao/nodebin.git .
