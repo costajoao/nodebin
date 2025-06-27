@@ -48,7 +48,14 @@ jobs:
           git tag v$NEW_VERSION
           git push origin main --follow-tags
 
-      - name: "✏️ Generate release changelog"
+      - name: Get next version
+        uses: reecetech/version-increment@2024.10.1
+        id: version
+        with:
+          scheme: semver
+          increment: patch
+
+      - name: Generate release changelog
         uses: janheinrichmerker/action-github-changelog-generator@v2.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }} 
@@ -83,21 +90,39 @@ jobs:
           sbom: true
           tags: |
             costajoao/nodebin:latest
-            costajoao/nodebin:${{ env.NEW_VERSION }}
+            costajoao/nodebin:${{ needs.version_and_tag.outputs.new_version }}
+
+      - name: Generate release changelog
+        uses: janheinrichmerker/action-github-changelog-generator@v2.3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit updated RELEASE.md
+        run: |
+          git add RELEASE.md
+          git commit -m "docs: append release notes for v${{ needs.version_and_tag.outputs.new_version }}" || echo "No changes"
+          git push origin main
 
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build, version_and_tag]
     permissions:
       contents: write
-
     steps:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ needs.build.outputs.new_version }}
-          name: v${{ needs.build.outputs.new_version }}
-          body: ${{ needs.build.outputs.release_notes }}
+          tag_name: v${{ needs.version_and_tag.outputs.new_version }}
+          name: v${{ needs.version_and_tag.outputs.new_version }}
+          body_path: RELEASE.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  pr_build:
+    if: github.event_name == 'pull_request'
+    name: PR Build (No Version/Tag)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Add build/test steps here as needed
