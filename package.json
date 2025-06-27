@@ -4,12 +4,14 @@
   "description": "A clone of PostBin (https://www.postb.in/) in Node.js",
   "main": "src/index.js",
   "scripts": {
-    "dev": "bun run --watch src/index",
+    "dev": "bun run --watch src/index & bun run lint:watch",
     "prod": "bun dist/index.js",
-    "build": "bun clean && bun build --sourcemap --target=bun --outdir=dist src/index.ts",
+    "build": "bun run clean && bun run build:code",
+    "build:code": "bun build --minify --sourcemap --target=bun --outdir=dist src/index.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "clean": "rm -rf dist",
-    "lint": "oxlint ./src --fix --deny=correctness --tsconfig=tsconfig.json --ignore-path=../.gitignore"
+    "lint": "oxlint ./src --fix --deny=correctness --tsconfig=tsconfig.json --ignore-path=../.gitignore",
+    "lint:watch": "bunx onchange \"src/**/*.ts\" -- bun run lint"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.3",

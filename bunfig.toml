@@ -1,6 +1,0 @@
-# bunfig.toml
-name = "nodebin"
-main = "src/index.ts"
-
-[compiler]
-resolveJsonModule = true
