@@ -1,7 +1,7 @@
 // db.ts
 import { Database } from 'bun:sqlite'
 
-const db = new Database('./postbin.db')
+const db = new Database('../data/postbin.db')
 
 const IS_PROD = process.env.NODE_ENV === 'production'
 
