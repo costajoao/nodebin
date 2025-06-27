@@ -1,35 +1,29 @@
-# Stage 1: Build dependencies and app
-FROM oven/bun:1.2.7-slim AS builder
-
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update && \
-  apt-get upgrade -y && \
-  apt-get install -y --no-install-recommends \
-  git ca-certificates tzdata && \
-  rm -rf /var/lib/apt/lists/*
-
+FROM oven/bun:1 AS base
 WORKDIR /app
 
-# Copy only package files first for better cache usage
-COPY package.json bun.lockb* ./
-RUN bun install --frozen-lockfile
+FROM base AS install
+RUN mkdir -p /temp/dev
+COPY package.json bun.lock /temp/dev/
+RUN cd /temp/dev && bun install --frozen-lockfile
 
-# Copy the rest of the source code
+RUN mkdir -p /temp/prod
+COPY package.json bun.lock /temp/prod/
+RUN cd /temp/prod && bun install --frozen-lockfile --production
+
+FROM base AS prerelease
+COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
-# Stage 2: Minimal runtime image
-FROM oven/bun:1.2.7-slim AS runtime
+# ENV NODE_ENV=production
+# RUN bun test
+# RUN bun run build
 
-# Create non-root user
-RUN id -u bun 2>/dev/null || adduser --system --home /home/bun --shell /bin/bash bun
+FROM base AS release
+COPY --from=install /temp/prod/node_modules ./node_modules
+COPY --from=prerelease /app ./src
+COPY --from=prerelease /app/package.json .
 
+# run the app
 USER bun
-WORKDIR /app
-
-# Copy only built app and dependencies from builder
-COPY --from=builder --chown=bun:bun /app /app
-
-EXPOSE 3000
-
-CMD ["bun", "src/index"]
+EXPOSE 3000/tcp
+ENTRYPOINT [ "bun", "run", "src/index.ts" ]
