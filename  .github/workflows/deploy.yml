@@ -14,7 +14,7 @@ on:
 
 jobs:
   build-and-release:
-    runs-on: self-hosted, nodebin
+    runs-on: [self-hosted, nodebin]
     environment: production
     permissions:
       contents: write
@@ -41,6 +41,64 @@ jobs:
           git tag v$NEW_VERSION
           git push origin main --follow-tags
 
+      - name: Generate sorted changelog section
+        id: changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          RANGE="${PREV_TAG}..HEAD"
+          if [ -z "$PREV_TAG" ]; then RANGE="HEAD"; fi
+
+          echo "## v${NEW_VERSION}" > section.md
+          echo "" >> section.md
+
+          git log $RANGE --pretty=format:"%s" | npx --yes conventional-commits-parser | \
+            awk '
+              /"type":/ {
+                if ($2 ~ /"feat"/) type = "feat";
+                else if ($2 ~ /"fix"/) type = "fix";
+                else if ($2 ~ /"chore"/) type = "chore";
+                else type = "other";
+              }
+              /"header":/ {
+                gsub(/"|,$/, "", $2);
+                commit = $2;
+                commits[type] = commits[type] "- " commit "\n";
+              }
+              END {
+                if (commits["feat"]) {
+                  print "### ✨ Features\n" commits["feat"] >> "section.md";
+                }
+                if (commits["fix"]) {
+                  print "### 🐛 Fixes\n" commits["fix"] >> "section.md";
+                }
+                if (commits["chore"]) {
+                  print "### 🔧 Chores\n" commits["chore"] >> "section.md";
+                }
+                if (commits["other"]) {
+                  print "### 📦 Other\n" commits["other"] >> "section.md";
+                }
+              }
+            '
+
+          echo "" >> section.md
+
+          # Prepend to RELEASE.md
+          if [ -f RELEASE.md ]; then
+            cat section.md RELEASE.md > RELEASE.tmp && mv RELEASE.tmp RELEASE.md
+          else
+            mv section.md RELEASE.md
+          fi
+
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          cat section.md >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Commit updated RELEASE.md
+        run: |
+          git add RELEASE.md
+          git commit -m "docs: append release notes for v${{ env.NEW_VERSION }}" || echo "No changes to commit"
+          git push origin main
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3.2.0
 
@@ -50,7 +108,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build & push multi-platform Docker image
+      - name: Build & push multi-platform Docker image with SBOM + provenance
         uses: docker/build-push-action@v5.3.0
         with:
           context: .
@@ -60,6 +118,8 @@ jobs:
             linux/arm/v7
             linux/386
           push: true
+          provenance: true
+          sbom: true
           tags: |
             costajoao/nodebin:latest
             costajoao/nodebin:${{ env.NEW_VERSION }}
@@ -69,7 +129,6 @@ jobs:
         with:
           tag_name: v${{ env.NEW_VERSION }}
           name: v${{ env.NEW_VERSION }}
-          body: |
-            🚀 New release: **v${{ env.NEW_VERSION }}**
+          body: ${{ env.RELEASE_NOTES }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
