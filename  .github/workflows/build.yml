@@ -23,6 +23,7 @@ env:
 
 jobs:
   build-and-release:
+    run-on: ubuntu-latest
     environment: production
     permissions:
       contents: write
