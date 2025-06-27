@@ -90,11 +90,11 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }} 
 
-      - name: Commit updated RELEASE.md
-        run: |
-          git add RELEASE.md
-          git commit -m "docs: append release notes for v${{ env.NEW_VERSION }}" || echo "No changes"
-          git push origin main
+      # - name: Commit updated RELEASE.md
+      #   run: |
+      #     git add RELEASE.md
+      #     git commit -m "docs: append release notes for v${{ env.NEW_VERSION }}" || echo "No changes"
+      #     git push origin main
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
