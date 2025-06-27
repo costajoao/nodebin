@@ -1,30 +1,34 @@
 # Stage 1: Build dependencies and app
-FROM oven/bun:1.2.17 AS builder
+FROM oven/bun:1.2.7-slim AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-WORKDIR /app
-
-# Install git and clone only latest commit
-RUN apt update && \
-  apt install -y --no-install-recommends git ca-certificates && \
-  git clone --depth=1 https://github.com/costajoao/nodebin.git . && \
+RUN apt-get update && \
+  apt-get upgrade -y && \
+  apt-get install -y --no-install-recommends \
+  git ca-certificates tzdata && \
   rm -rf /var/lib/apt/lists/*
 
-RUN bun install --production
-
-# Stage 2: Minimal runtime image
-FROM oven/bun:1.2.17
-
-# Create non-root user
-RUN adduser --system --home /home/bun --shell /bin/bash bun
-
 WORKDIR /app
 
-# Copy only built app and dependencies
-COPY --from=builder --chown=bun:bun /app /app
+# Copy only package files first for better cache usage
+COPY package.json bun.lockb* ./
+RUN bun install --frozen-lockfile
+
+# Copy the rest of the source code
+COPY . .
+
+# Stage 2: Minimal runtime image
+FROM oven/bun:1.2.7-slim AS runtime
+
+# Create non-root user
+RUN id -u bun 2>/dev/null || adduser --system --home /home/bun --shell /bin/bash bun
 
 USER bun
+WORKDIR /app
+
+# Copy only built app and dependencies from builder
+COPY --from=builder --chown=bun:bun /app /app
 
 EXPOSE 3000
 
