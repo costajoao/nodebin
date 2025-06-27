@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   build-and-release:
-    runs-on: self-hosted
+    runs-on: nodebin-runner
     environment: production
     permissions:
       contents: write
