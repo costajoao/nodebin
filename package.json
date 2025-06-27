@@ -1,6 +1,6 @@
 {
   "name": "@costajoao/nodebin",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "description": "A clone of PostBin (https://www.postb.in/) in Node.js",
   "main": "src/index.js",
   "scripts": {
