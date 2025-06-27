@@ -1,23 +1,29 @@
-# Use official Bun image as base
-FROM oven/bun:1.2.17-slim
+FROM oven/bun:1.2.17
+
+# Set non-interactive mode for apt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install git and tzdata (without prompts)
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends git tzdata && \
+  rm -rf /var/lib/apt/lists/*
+
+# Clone the repo
+RUN git clone https://github.com/costajoao/nodebin.git /app
 
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and bun.lockb
-# Ensure both files exist in the build context, or copy only the existing ones
-COPY package.json bun.lock ./
-
-# Install dependencies
+# Install dependencies using Bun
 RUN bun install
 
+# Set environment variables
+ENV NODE_ENV=production
 ENV PORT=3000
+ENV TZ=America/Sao_Paulo
 
-# Copy project files
-COPY . .
+# Expose port
+EXPOSE ${PORT}
 
-# Expose port (change if your app uses a different port)
-EXPOSE ${PORT:-3000}
-
-# Default command (update as needed)
-CMD ["bun", "src/index"]
+# Start app
+CMD ["bun", "src/index.ts"]
