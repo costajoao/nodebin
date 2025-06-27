@@ -32,4 +32,4 @@ COPY --from=builder --chown=bun:bun /app /app
 
 EXPOSE 3000
 
-CMD ["bun", "src/index.ts"]
+CMD ["bun", "src/index"]

@@ -16,9 +16,11 @@
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "js-yaml": "^4.1.0",
+    "mime-db": "^1.54.0",
     "mime-types": "^3.0.1",
     "multer": "^2.0.1",
     "nanoid": "^5.1.5",
+    "sqlite3": "^5.1.7",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
@@ -29,7 +31,7 @@
     "@types/node": "^24.0.4",
     "@types/xml2js": "^0.4.14",
     "bun": "^1.2.17",
-    "prettier": "3.6.1",
+    "prettier": "3.6.2",
     "@types/bun": "latest"
   },
   "private": true,
