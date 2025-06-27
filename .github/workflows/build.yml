@@ -7,6 +7,9 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+env:
+  PLATFORMS: linux/amd64,linux/arm64
+
 concurrency:
   group: release-${{ github.workflow }}
   cancel-in-progress: false
@@ -99,7 +102,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ env.PLATFORMS }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -114,13 +117,13 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ env.PLATFORMS }}
           push: true
           provenance: true
           sbom: true
           tags: |
             costajoao/nodebin:latest
-            costajoao/nodebin:${{ needs.version_and_tag.outputs.new_version }}
+            costajoao/nodebin:${{ needs.build.outputs.new_version }}
 
       - name: Generate release changelog
         uses: janheinrichmerker/action-github-changelog-generator@v2.3
@@ -130,7 +133,7 @@ jobs:
       - name: Commit updated RELEASE.md
         run: |
           git add RELEASE.md
-          git commit -m "docs: append release notes for v${{ needs.version_and_tag.outputs.new_version }}" || echo "No changes"
+          git commit -m "docs: append release notes for v${{ needs.build.outputs.new_version }}" || echo "No changes"
           git push origin main
 
   release:
@@ -143,8 +146,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ needs.version_and_tag.outputs.new_version }}
-          name: v${{ needs.version_and_tag.outputs.new_version }}
+          tag_name: v${{ needs.build.outpåuts.new_version }}
+          name: v${{ needs.build.outputs.new_version }}
           body_path: RELEASE.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
