@@ -1,7 +1,9 @@
-name: Release & Deploy on Main
+name: Release and Docker Build
 
 on:
   push:
+    branches: [ "main" ]
+  pull_request:
     branches: [ "main" ]
   workflow_dispatch:
 
@@ -10,7 +12,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release-and-deploy:
+  release:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     environment: production
