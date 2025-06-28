@@ -52,6 +52,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
 
       - name: Generate release changelog
         uses: janheinrichmerker/action-github-changelog-generator@v2.3
@@ -79,7 +81,7 @@ jobs:
     name: Publish Docker Image
     runs-on: ubuntu-latest
     environment: production
-    needs: [release]
+    needs: [test, release]
 
     steps:
       - name: Checkout code
@@ -112,7 +114,7 @@ jobs:
             costajoao/nodebin:${{ needs.release.outputs.version }}
 
       - name: Upload Docker Image Digest
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: docker-image-digest
           path: ./docker-image-digest.txt
