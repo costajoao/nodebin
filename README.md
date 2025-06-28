@@ -1,10 +1,32 @@
-# 📬 NodeBin
+<p align="center">
+  <h1 align="center">📬 NodeBin</h1>
+</p>
 
-> Use NodeBin to collect all requests to a special URL which you can use to test your API Clients or your WebHooks.
+<p align="center">
+  Collect and inspect HTTP requests in real time — perfect for testing webhooks, API clients, and more.
+</p>
 
-NodeBin is a lightweight, self-hosted HTTP request collector — ideal for testing webhooks, HTTP clients, or any service that sends HTTP requests. Create a temporary bin and inspect request payloads in real time, either via UI or programmatically via its RESTful API. This project is inspired by the original [postbin](https://postb.in) project.
+<p align="center">
+  <a title="Docker Pulls" href="https://hub.docker.com/r/costajoao/nodebin">
+    <img src="https://img.shields.io/docker/pulls/costajoao/nodebin?style=flat&logo=docker&logoColor=FFFFFF&label=Docker%20Pulls&labelColor=0db7ed" alt="Docker Pulls" />
+  </a>
+  <img src="https://github.com/costajoao/nodebin/actions/workflows/build.yml/badge.svg?style=flat" alt="Build and Analysis Checks" />
+  <br />
+  <a href="https://bun.sh">
+    <img src="https://img.shields.io/badge/Bun-%23000000.svg?style=flat&logo=bun&logoColor=white" alt="Bun.js" />
+  </a>
+  <a title="MIT License" href="LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" />
+  </a>
+  <br />
+  <br />
+</p>
 
-## 🚀 Features
+**NodeBin** is a lightweight, self-hosted HTTP request collector — ideal for testing webhooks, HTTP clients, or any service that sends HTTP requests. Create temporary bins and inspect request payloads live via a clean UI or RESTful API. Inspired by the original [PostBin](https://postb.in) project, it’s minimal, fast, and runs on Bun.js.
+
+![](public/img/screenshot.png)
+
+## Features
 
 - 🔗 Unique bin URLs that accept any HTTP method
 - 🧪 View headers, query params, and request body
@@ -14,77 +36,65 @@ NodeBin is a lightweight, self-hosted HTTP request collector — ideal for testi
 - 🧼 Minimal and portable — runs on SQLite and Bun.js
 - 🎨 Clean, responsive UI built with Tailwind CSS
 
-## 🖥️ Demo
+## Getting Started
 
-> Coming soon — deployable link or video here.
-
-## 📦 Getting Started
-
-### 1. Clone the repository
+## Docker Run
 
 ```bash
+docker run -d --name nodebin \
+  -p 3000:3000 \
+  -e BUN_ENV=production \
+  -e PORT=3000 \
+  -v nodebin_data:/app/data \
+  costajoao/nodebin:latest
+```
+
+## Docker Compose
+
+```yaml
+version: '3.8'
+services:
+  nodebin:
+    image: costajoao/nodebin:latest
+    container_name: nodebin
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - BUN_ENV=production
+      - PORT=3000
+    volumes:
+      - nodebin_data:/app/data
+volumes:
+  nodebin_data:
+```
+
+## Development setup
+
+```sh
 git clone https://github.com/costajoao/postbin.git
 cd postbin
-```
-
-### 2. Install dependencies
-
-```bash
 bun install
+bun run dev
 ```
 
-### 3. Run the server
+By default, NodeBin runs on [http://localhost:3000](http://localhost:3000). If you need to use the API, see [full documentation](http://localhost:3000/api) in the UI.
 
-```bash
-bun start
-```
-
-By default, NodeBin runs on [http://localhost:3001](http://localhost:3001)
-
-## 🧪 Example Usage
-
-Create a new bin:
-
-```bash
-curl -X POST http://localhost:3001/api/bin
-```
-
-Send a request to your bin:
-
-```bash
-curl http://localhost:3001/abc123
-```
-
-Fetch all requests:
-
-```bash
-curl http://localhost:3001/api/bin/abc123/requests
-```
-
-See full [API documentation](http://localhost:3001/api) in the UI.
-
-## 🧰 Tech Stack
+## Tech Stack
 
 - **Backend:** Bun.js, SQLite
 - **Frontend:** Vanilla JS, Tailwind CSS
 - **Database:** SQLite (in-memory by default)
 
-## 📂 Project Structure
+## License
 
-```
-.
-├── db.js              # SQLite schema and setup
-├── index.js           # Main Bun app
-├── views/             # EJS templates
-├── public/            # Static files (CSS, favicon)
-├── routes/            # API + frontend routes
-└── README.md
-```
+Distributed under the MIT license. See `LICENSE` for more info.  
+[https://github.com/costajoao/postbin](https://github.com/costajoao/postbin).
 
-## 📄 License
+## Contributing
 
-[NodeBin](LICENSE) is MIT licensed.
-
-## ⭐️ Support
-
-If you find this project useful, consider giving it a star! ⭐
+1. Fork it (<https://github.com/costajoao/postbin/fork>)
+2. Create your feature branch (`git checkout -b feature/fooBar`)
+3. Commit your changes (`git commit -am 'Add some fooBar'`)
+4. Push to the branch (`git push origin feature/fooBar`)
+5. Create a new Pull Request
