@@ -7,17 +7,7 @@
 </p>
 
 <p align="center">
-  <a title="Docker Pulls" href="https://hub.docker.com/r/costajoao/nodebin">
-    <img src="https://img.shields.io/docker/pulls/costajoao/nodebin?style=flat&logo=docker&logoColor=FFFFFF&label=Docker%20Pulls&labelColor=0db7ed" alt="Docker Pulls" />
-  </a>
-  <img src="https://github.com/costajoao/nodebin/actions/workflows/build.yml/badge.svg?style=flat" alt="Build and Analysis Checks" />
-  <br />
-  <a href="https://bun.sh">
-    <img src="https://img.shields.io/badge/Bun-%23000000.svg?style=flat&logo=bun&logoColor=white" alt="Bun.js" />
-  </a>
-  <a title="MIT License" href="LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" />
-  </a>
+  <img src="https://github.com/costajoao/nodebin/actions/workflows/build.yml/badge.svg?style=flat" alt="Build and Analysis Checks" /> <a title="Docker Pulls" href="https://hub.docker.com/r/costajoao/nodebin"><img src="https://img.shields.io/docker/pulls/costajoao/nodebin?style=flat&logo=docker&logoColor=FFFFFF&label=Docker%20Pulls&labelColor=0db7ed" alt="Docker Pulls" /></a> <a title="MIT License" href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License" /></a>
   <br />
   <br />
 </p>
