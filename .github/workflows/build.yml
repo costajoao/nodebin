@@ -118,3 +118,10 @@ jobs:
         with:
           name: docker-image-digest
           path: ./docker-image-digest.txt
+
+      - name: Bump Version of package.json
+        uses: ramonpaolo/bump-version@v2.3.1
+        with:
+          tag: ${{ needs.release.outputs.version }}
+          commit: true
+          branch_to_push: 'main'
