@@ -7,22 +7,16 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
-env:
-  PLATFORMS: linux/amd64,linux/arm64
-
 concurrency:
   group: release-${{ github.workflow }}
   cancel-in-progress: false
 
 jobs:
 
-  verify:
+  test:
+    name: Check Code
     if: github.actor != 'github-actions[bot]'
-    name: Verify Code
     runs-on: ubuntu-latest
-    environment: production
-    permissions:
-      contents: read
 
     steps:
       - name: Checkout code
@@ -45,63 +39,56 @@ jobs:
       - name: Build project
         run: bun run build
 
-  build:
-    name: Build Docker Image
+  release:
+    name: Release Version
+    needs: [test]
     runs-on: ubuntu-latest
-    environment: production
-    needs: [verify]
+    outputs:
+      version: ${{ steps.version.outputs.tag }}
     permissions:
       contents: write
       packages: write
 
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      # - name: Bump package version (minor)
-      #   id: bump
-      #   run: |
-      #     npm version patch --no-git-tag-version
-      #     NEW_VERSION=$(node -p "require('./package.json').version")
-      #     echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-      #     echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-
-      # - name: Commit and tag new version
-      #   run: |
-      #     git commit -am "chore: bump version to $NEW_VERSION"
-      #     git tag v$NEW_VERSION
-      #     git push origin main --follow-tags
-
-      - name: Bump package version
-        uses: reecetech/version-increment@2024.10.1
-        id: version
-        with:
-          scheme: semver
-          increment: patch
-
-      - name: Commit and tag new version
-        run: |
-          git commit -am "chore: bump version to ${{ steps.version.outputs.version }}"
-          git tag v${{ steps.version.outputs.version }}
-          git push origin main --follow-tags
 
       - name: Generate release changelog
         uses: janheinrichmerker/action-github-changelog-generator@v2.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }} 
 
+      - name: Get next version
+        uses: anothrNick/github-tag-action@v1
+        id: version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_PREFIX: v
+          PRERELEASE: true
+          DEFAULT_BUMP: patch
+
+      - name: Release version
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.ref_name == github.event.repository.default_branch }}
+        with:
+          draft: false
+          prerelease: false
+          tag_name: "${{ steps.version.outputs.tag }}"
+
+  publish:
+    name: Publish Docker Image
+    runs-on: ubuntu-latest
+    environment: production
+    needs: [release]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          platforms: ${{ env.PLATFORMS }}
+          platforms: ${{ vars.PLATFORMS }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -116,41 +103,14 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: ${{ env.PLATFORMS }}
+          platforms: ${{ vars.PLATFORMS }}
           push: true
           provenance: true
           sbom: true
           tags: |
             costajoao/nodebin:latest
-            costajoao/nodebin:${{ steps.version.outputs.version }}
+            costajoao/nodebin:${{ needs.release.outputs.version }}
 
-      - name: Generate release changelog
-        uses: janheinrichmerker/action-github-changelog-generator@v2.3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Commit updated RELEASE.md
-      #   run: |
-      #     git add RELEASE.md
-      #     git commit -m "docs: append release notes for v${{ steps.version.outputs.version }}" || echo "No changes"
-      #     git push origin main
-
-  release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    needs: [verify, build]
-    permissions:
-      contents: write
-    steps:
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ needs.build.outputs.version }}
-          name: v${{ needs.build.outputs.version }}
-          body_path: RELEASE.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
       - name: Upload Docker Image Digest
         uses: actions/upload-artifact@v3
         with:
