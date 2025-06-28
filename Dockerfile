@@ -26,4 +26,4 @@ COPY --from=prerelease /app/package.json .
 # run the app
 USER bun
 EXPOSE 3000/tcp
-ENTRYPOINT [ "bun", "run", "prod" ]
+ENTRYPOINT [ "bun", "dist/index.js" ]
